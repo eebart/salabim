@@ -29,7 +29,7 @@ from __future__ import print_function  # compatibility with Python 2.x
 from __future__ import division  # compatibility with Python 2.x
 
 import platform
-Pythonista = (platform.system() == 'Darwin')
+Pythonista = (platform.system() == 'Darwin' and platform.machine().startswith('iP'))
 
 import heapq
 import random
@@ -441,7 +441,7 @@ class Monitor(object):
 
                 print(indent + '{:13.3f} {:13.3f}{:6.1f}{:6.1f} {}'.
                       format(ub, count, perc * 100, cumperc * 100, s))
-                      
+
     def x(self, ex0=False):
         '''
         array of tallied values
@@ -1286,8 +1286,8 @@ class Queue(object):
 
         Notes
         -----
-        the priority of component will be set to the priority of poscomponent 
-        
+        the priority of component will be set to the priority of poscomponent
+
         '''
         component.enter_behind(self, poscomponent)
 
@@ -2171,7 +2171,7 @@ class Environment(object):
                     if Pythonista:
                         raise AssertionError(
                             'video production is not supported under Pythonista.')
-                    else:    
+                    else:
                         raise AssertionError(
                             'cv2 required for video production. Run pip install opencv_python.')
 
@@ -2534,7 +2534,7 @@ class Environment(object):
 
         Notes
         -----
-        if the current component's suppress_trace is True, nothing is printed  
+        if the current component's suppress_trace is True, nothing is printed
         '''
         if self._trace:
             if hasattr(self, '_current_component'):
@@ -3845,7 +3845,7 @@ class Component(object):
 
     def __repr__(self):
         return 'Component('+self._name+')'
-    
+
     def print_info(self):
         print('Component ' + hex(id(self)))
         print('  name=' + self._name)
@@ -3927,7 +3927,7 @@ class Component(object):
                     r._minq = inf
             self._requests = {}
             self._failed = True
-            
+
         if len(self._waits) != 0:
             self.env.print_trace('', '', self._name, 'wait failed')
             for state, _,  _ in self._waits:
@@ -3935,7 +3935,7 @@ class Component(object):
                     self._leave(state._waiters)
             self._waits = []
             self._failed = True
-            
+
     def _reschedule(self, scheduled_time, urgent, caller, extra=''):
         if scheduled_time < self.env._now:
             raise AssertionError(
@@ -4274,7 +4274,7 @@ class Component(object):
         if mode != '*':
             self._mode = mode
             self._mode_time = self.env._now
-            
+
         self._failed = False
         i = 0
         for i in range(len(args)):
@@ -4339,7 +4339,7 @@ class Component(object):
             self._requests = {}
             self._remove()
             self._reschedule(self.env._now, False, 'request honored')
-                
+
     def _release(self, r, q):
         if r not in self._claims:
             raise AssertionError(self._name +
@@ -4412,7 +4412,7 @@ class Component(object):
                     raise AssertionError(
                         'not possible to release anonymous resources ' + r.name())
                 self._release(r, q)
-                
+
     def wait(self, *args, fail_at=None, fail_delay=None, all=False, mode='*'):
         '''
         wait for any or all of the given state values are met
@@ -4440,7 +4440,7 @@ class Component(object):
             the request will be cancelled and the
             parameter failed will be set. |n|
             if not specified, the wait will not time out.
-            
+
         all : bool
             if False (default), continue, if any of the given state/values are met |n|
             if True, continue if all of the given state/values are met
@@ -4461,12 +4461,12 @@ class Component(object):
 
         It is allowed to wait for more than one value of a state |n|
         the parameter failed will be reset by a calling wait
-        
+
         If you want to check for all components to meet a value (and clause),
         use Component.wait(..., all=True)
 
         The value may be specified in three different ways:
-            
+
         * constant, that value is just compared to state.value() |n|
           yield self.wait((light,'red'))
         * an expression, containg one or more $-signs
@@ -4492,17 +4492,17 @@ class Component(object):
         --> waits for s1.value()==False or s2.value=='on' or s3.value()==True
         s1 is at the tail of waiters, because of the set priority
         yield self.wait(s1,s2,all=True) |n|
-        --> waits for s1.value()==True and s2.value==True |n|            
+        --> waits for s1.value()==True and s2.value==True |n|
         '''
         if self._status != current:
             self._checkisnotdata()
             self._checkisnotmain()
             self._remove()
             self._check_fail()
-            
+
         self._wait_all = all
         self._fail = False
-        
+
         if fail_at is None:
             if fail_delay is None:
                 scheduled_time = inf
@@ -4516,7 +4516,7 @@ class Component(object):
                 scheduled_time = fail_at
             else:
                 raise AssertionError('both fail_at and fail_delay specified')
-                
+
         if mode != '*':
             self._mode = mode
             self._mode_time = self.env._now
@@ -4535,7 +4535,7 @@ class Component(object):
                     priority = argsi[2]
             else:
                 raise AssertionError('incorrect specifier', args)
-                
+
             addstring = ''
             for (statex, _, _) in self._waits:
                 if statex == state:
@@ -4552,11 +4552,11 @@ class Component(object):
                 self._waits.append((state, value, 1))
             else:
                 self._waits.append((state, value, 0))
-                
+
         if len(self._waits)==0:
             raise AssertionError ('no states specified')
         self._trywait()
-                            
+
         if len(self._waits) != 0:
             self._reschedule(scheduled_time, False, 'wait')
 
@@ -4592,7 +4592,7 @@ class Component(object):
                     if value((state._value,self,state)):
                         honored = True
                         break
-                
+
         if honored:
             for s, _, _ in self._waits:
                 if self in s._waiters:  # there might be more values for this state
@@ -4600,10 +4600,10 @@ class Component(object):
             self._waits = []
             self._remove()
             self._reschedule(self.env._now, False, 'wait honored')
-            
+
         return honored
 
-        
+
     def claimed_quanity(self):
         ''''
         Parameters
@@ -4798,7 +4798,7 @@ class Component(object):
         Be sure to always include the parentheses, otherwise the result will be always True!
         '''
         return len(self._requests) != 0
-        
+
     def isscheduled(self):
         '''
         Returns
@@ -5039,11 +5039,11 @@ class Component(object):
                 # leave.sort is not possible, because statistics will be affected
                 mx.predecessor.successor = mx.successor
                 mx.successor.predecessor = mx.predecessor
-    
+
                 m2 = q._head.successor
                 while (m2 != q._tail) and (m2.priority <= priority):
                     m2 = m2.successor
-    
+
                 m1 = m2.predecessor
                 m1.successor = mx
                 m2.predecessor = mx
@@ -5271,7 +5271,7 @@ class Normal(_Distribution):
 
     def __repr__(self):
         return 'Normal'
-        
+
     def print_info(self):
         print('Normal distribution ' + hex(id(self)))
         print('  mean=' + str(self._mean))
@@ -5331,7 +5331,7 @@ class Uniform(_Distribution):
 
     def __repr__(self):
         return 'Uniform'
-        
+
     def print_info(self):
         print('Uniform distribution ' + hex(id(self)))
         print('  lowerbound=' + str(self._lowerbound))
@@ -5404,7 +5404,7 @@ class Triangular(_Distribution):
 
     def __repr__(self):
         return 'Triangular'
-        
+
     def print_info(self):
         print('Triangular distribution ' + hex(id(self)))
         print('  low=' + str(self._low))
@@ -5456,7 +5456,7 @@ class Constant(_Distribution):
 
     def __repr__(self):
         return 'Constant'
-        
+
     def print_info(self):
         print('Constant distribution ' + hex(id(self)))
         print('  value=' + str(self._value))
@@ -5544,7 +5544,7 @@ class Cdf(_Distribution):
 
     def __repr__(self):
         return 'Cdf'
-        
+
     def print_info(self):
         print('Cdf distribution ' + hex(id(self)))
         print('  randomstream=' + hex(id(self.randomstream)))
@@ -5675,7 +5675,7 @@ class Pdf(_Distribution):
 
     def __repr__(self):
         return 'Pdf'
-        
+
     def print_info(self):
         print('Pdf distribution ' + hex(id(self)))
         print('  randomstream=' + hex(id(self.randomstream)))
@@ -5792,10 +5792,10 @@ class Distribution(_Distribution):
 
     def __repr__(self):
         return self._distribution.__repr__()
-        
+
     def print_info(self):
-        self._distribution.print_info()        
-        
+        self._distribution.print_info()
+
     def sample(self):
         '''
         Returns
@@ -5813,7 +5813,7 @@ class Distribution(_Distribution):
         '''
         return self._mean
 
-        
+
 class State(object):
     '''
     State
@@ -5833,7 +5833,7 @@ class State(object):
     monitor : bool
         if True (default) , the waiters queue and the value are monitored |n|
         if False, monitoring is disabled.
-        
+
     env : Environment
         environment to be used |n|
         if omitted, _default_env is used
@@ -5856,7 +5856,7 @@ class State(object):
         self.env.print_trace(
             '', '', self.name() + ' created',
             'value= --> ' + str(self._value))
-            
+
     def __repr__(self):
         return 'State('+self._name+')'
 
@@ -5880,31 +5880,31 @@ class State(object):
                         values = values + str(value)
 
                 print('    ' + pad(c._name, 20),' value(s): '+values)
-            
+
     def __call__(self):
         return self._value
-                  
+
     def get(self):
         '''
         get value of the state
-        
+
         Returns
         -------
         value of the state : any
         '''
         return self._value
-        
+
     def set(self, value=True):
         '''
         set the value of the state
-        
+
         Parameters
         ----------
         value : any (preferably printable)
             if omitted, True |n|
             if there is a change, the waiters queue will be checked
             to see whether there are waiting components to be honored
-            
+
         Notes
         -----
         This method is identical to reset, except the default value is True.
@@ -5914,41 +5914,41 @@ class State(object):
             self._value = value
             self.value.tally()
             self._trywait()
-        
+
     def reset(self, value=False):
         '''
         reset the value of the state
-        
+
         Parameters
         ----------
         value : any (preferably printable)
             if omitted, False |n|
             if there is a change, the waiters queue will be checked
             to see whether there are waiting components to be honored
-            
+
         Notes
         -----
         This method is identical to set, except the default value is False.
         '''
         self.set(value)
-        
+
     def trigger(self, value=True, value_after=None, max=inf):
         '''
         triggers the value of the state
-        
+
         Parameters
         ----------
         value : any (preferably printable)
             if omitted, True |n|
-            
+
         value_after : any (preferably printable)
             after the trigger, this will be the new value. |n|
             if omitted, return to the the before the trigger.
-        
+
         max : int
             maximum number of components to be honored for the trigger value |n|
             default: inf
-            
+
         Notes
         -----
         The value of the state will be set to value, then at most
@@ -5967,7 +5967,7 @@ class State(object):
         self._value = value_after
         self.value.tally()
         self._trywait()
-        
+
     def _trywait(self, max=inf):
         mx = self._waiters._head.successor
         while mx != self._waiters._tail:
@@ -5999,7 +5999,7 @@ class State(object):
 
     def _get_value(self):
         return self._value
-        
+
     def name(self, txt=None):
         '''
         Parameters
@@ -6074,7 +6074,7 @@ class State(object):
                 m.print_histogram(
                     number_of_bins=0, print_header=False, print_legend=False, indent='    ')
             print()
-            
+
     def waiters(self):
         '''
         Returns
@@ -6109,7 +6109,7 @@ class Resource(object):
     env : Environment
         environment to be used |n|
         if omitted, _default_env is used
-        
+
     monitor : bool
         if True (default) , the requesters queue, the claimers queue,
         the capacity, the available_quantity and the claimed_quantity are monitored |n|
@@ -6236,7 +6236,7 @@ class Resource(object):
 
     def __repr__(self):
         return 'Resource('+self._name+')'
-    
+
     def print_info(self):
         print('Resource ' + hex(id(self)))
         print('  name=' + self._name)
@@ -6691,7 +6691,7 @@ def pad(txt, n):
 
 def rpad(txt, n):
     return txt.rjust(n)[:n]
-    
+
 
 def list_to_numeric_array(l):
     x = np.array(l)
@@ -6709,8 +6709,8 @@ def list_to_numeric_array(l):
                 x.append(v)
         x = np.array(x)
     return x
-    
-    
+
+
 def normalize(s):
     res = ''
     for c in s.upper():
@@ -6763,7 +6763,7 @@ def scheduled():
 
 def requesting():
     return 'requesting'
-    
+
 
 def waiting():
     return 'waiting'
