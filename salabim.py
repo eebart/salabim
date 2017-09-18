@@ -27,7 +27,7 @@ see www.salabim.org for more information, the manual and updates.
 '''
 
 import platform
-Pythonista = (platform.system() == 'Darwin' and platform.machine().startswith('iP'))
+Pythonista = (platform.system() == 'Darwin')
 
 import heapq
 import random
@@ -3924,7 +3924,7 @@ class Component(object):
         pass
 
     def __repr__(self):
-        return 'Component('+self._name+')'
+        return 'Component('+self.name()+')'
 
     def print_info(self):
         print('Component ' + hex(id(self)))
@@ -4418,7 +4418,7 @@ class Component(object):
                 r.available_quantity.tally()
             self._requests = {}
             self._remove()
-            self._reschedule(self.env._now, False, 'request honored')
+            self._reschedule(self.env._now, False, 'request honour')
 
     def _release(self, r, q):
         if r not in self._claims:
@@ -4679,7 +4679,7 @@ class Component(object):
                     self._leave(s._waiters)
             self._waits = []
             self._remove()
-            self._reschedule(self.env._now, False, 'wait honored')
+            self._reschedule(self.env._now, False, 'wait honor')
 
         return honored
 
@@ -5934,8 +5934,8 @@ class State(object):
             name=('Value of ',self),
             getter=self._get_value, monitor=monitor, env=self.env)
         self.env.print_trace(
-            '', '', self.name() + ' created',
-            'value= --> ' + str(self._value))
+            '', '', self.name() + ' create',
+            'value= ' + str(self._value))
 
     def __repr__(self):
         return 'State('+self.name()+')'
@@ -5959,7 +5959,7 @@ class State(object):
                             values = values + ', '
                         values = values + str(value)
 
-                print('    ' + pad(c._name, 20),' value(s): '+values)
+                print('    ' + pad(c.name(), 20),' value(s): '+values)
 
     def __call__(self):
         return self._value
@@ -6010,7 +6010,11 @@ class State(object):
         -----
         This method is identical to set, except the default value is False.
         '''
-        self.set(value)
+        self.env.print_trace('', '', self.name()+' reset', 'value = ' + str(value))
+        if self._value != value:
+            self._value = value
+            self.value.tally()
+            self._trywait()
 
     def trigger(self, value=True, value_after=None, max=inf):
         '''
@@ -6121,39 +6125,12 @@ class State(object):
         '''
         prints a summary of statistics of the state
         '''
-        print('Info on {} @ {:13.3f}'.format(self._name, self.env._now))
-        if (self.waiters().length.duration() == 0) and \
-            (self.waiters().length_of_stay.number_of_entries() == 0) and \
-            (self.value.duration() == 0):
-            print('    no data collected')
-            return
-
-        print('                            all    excl.zero         zero')
-        print('    -------------- ------------ ------------ ------------')
-        for q in [self.waiters()]:
-            print('Length of ' + q._name)
-            if q.length.duration() == 0:
-                print('    no data collected')
-            else:
-                q.length.print_histogram(
-                    number_of_bins=0, print_header=False, print_legend=False, indent='    ')
-            print()
-            print('Length of stay of ' + q._name)
-            if q.length_of_stay.number_of_entries() == 0:
-                print('    no data collected')
-            else:
-                q.length_of_stay.print_histogram(
-                    number_of_bins=0, print_header=False, print_legend=False, indent='    ')
-            print()
-
-        for m in [self.value]:
-            print(m._name)
-            if m.duration() == 0:
-                print('    no data collected')
-            else:
-                m.print_histogram(
-                    number_of_bins=0, print_header=False, print_legend=False, indent='    ')
-            print()
+        print('Statistics of {} at {:13.3f}'.format(self.name(), self.env._now))
+        self.waiters().length.print_statistics(show_header=False, show_legend=True, do_indent=True)
+        print()
+        self.waiters().length_of_stay.print_statistics(show_header=False, show_legend=False, do_indent=True)
+        print()
+        self.value.print_statistics(show_header=False, show_legend=False, do_indent=True)
 
     def waiters(self):
         '''
@@ -6290,7 +6267,7 @@ class Resource(object):
         self.claimed_quantity.monitor(value)
 
     def __repr__(self):
-        return 'Resource('+self._name+')'
+        return 'Resource('+self.name()+')'
 
     def print_info(self):
         print('Resource ' + hex(id(self)))
