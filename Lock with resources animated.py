@@ -161,7 +161,7 @@ def do_animation():
     xbound = {left: -1 * locklength, right: 1 * locklength}
     yspace = 5
 
-    sim.animation_parameters(
+    env.animation_parameters(
         x0=xbound[left], y0=-waterdepth, x1=xbound[right], modelname='Lock', speed=8)
 
     for side in [left, right]:
