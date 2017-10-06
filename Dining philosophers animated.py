@@ -78,7 +78,7 @@ def set_nphilosophers(val):
     nphilosophers = int(val)
     if nphilosophers != nphilosophers_last:
         nphilosophers_last = nphilosophers
-        sim.main().activate()
+        env.main().activate()
 
 
 class Philosopher(sim.Component):

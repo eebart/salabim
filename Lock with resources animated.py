@@ -188,22 +188,22 @@ def do_animation():
     a = sim.Animate(rectangle0=(0, 0, 0, 0), fillcolor0='black', linewidth0=0)
     a.rectangle = lock_door_right_rectangle
 
-    a = sim.Animate(text='', x0=300, y0=650, screen_coordinates=True,
-        fontsize0=15, font='DejaVuSansMono', anchor='w')
+    a = sim.Animate(text='', x0=10, y0=650, screen_coordinates=True,
+        fontsize0=15, font='narrow', anchor='w')
     a.text = lambda t: 'mean waiting left : {:5.1f} (n={})'.\
         format(key_in[left].requesters().length_of_stay.mean(),
            key_in[left].requesters().length_of_stay.number_of_entries())
-    a = sim.Animate(text='', x0=300, y0=630, screen_coordinates=True,
-        fontsize0=15, font='DejaVuSansMono', anchor='w')
+    a = sim.Animate(text='', x0=10, y0=630, screen_coordinates=True,
+        fontsize0=15, font='narrow', anchor='w')
     a.text = lambda t: 'mean waiting right: {:5.1f} (n={})'.\
         format(key_in[right].requesters().length_of_stay.mean(),
            key_in[right].requesters().length_of_stay.number_of_entries())
-    a = sim.Animate(text='xx=12.34', x0=300, y0=610, screen_coordinates=True,
-        fontsize0=15, font='DejaVuSansMono', anchor='w')
+    a = sim.Animate(text='xx=12.34', x0=10, y0=610, screen_coordinates=True,
+        fontsize0=15, font='narrow', anchor='w')
     a.text = lambda t: '  nr waiting left : {:3d}'.format(
         key_in[left].requesters().length())
-    a = sim.Animate(text='xx=12.34', x0=300, y0=590, screen_coordinates=True,
-        fontsize0=15, font='DejaVuSansMono', anchor='w')
+    a = sim.Animate(text='xx=12.34', x0=10, y0=590, screen_coordinates=True,
+        fontsize0=15, font='narrow', anchor='w')
     a.text = lambda t: '  nr waiting right: {:3d}'.format(
         key_in[right].requesters().length())
 
