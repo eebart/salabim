@@ -73,7 +73,7 @@ class MachineBarJobAnimate(sim.Animate):
     def rectangle(self, t):
         d = self.machine.job_time
         return(
-            100, 100 + self.machine.n * 30,
+            100, 100 + self.machine.n * 30, #200 ipv 100
             100 + d * SCALE, 100 + self.machine.n * 30 + 20)
 
     def fillcolor(self, t):
